@@ -1,0 +1,49 @@
+import serial
+import pyttsx3
+import time
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+import joblib
+
+# Load Trained Model
+model = joblib.load('gesture_model.pkl')
+
+# Gesture Mapping
+gesture_map = {
+    0: "I need help",
+    1: "I'm hungry",
+    2: "Thank you",
+    3: "Water please",
+    4: "Call a doctor"
+}
+
+# TTS Engine
+engine = pyttsx3.init()
+engine.setProperty('rate', 150)
+
+# Serial Port Setup
+ser = serial.Serial('COM3', 9600)  # Change COM port as needed
+time.sleep(2)  # Wait for Arduino to connect
+
+def speak(message):
+    print(f">> {message}")
+    engine.say(message)
+    engine.runAndWait()
+
+while True:
+    try:
+        line = ser.readline().decode('utf-8').strip()
+        values = list(map(int, line.split(',')))
+
+        if len(values) == 5:
+            input_vector = np.array(values).reshape(1, -1)
+            gesture = model.predict(input_vector)[0]
+            speak(gesture_map.get(gesture, "Unknown gesture"))
+
+        time.sleep(1)
+
+    except KeyboardInterrupt:
+        print("Stopped by user.")
+        break
+    except Exception as e:
+        print("Error:", e)
