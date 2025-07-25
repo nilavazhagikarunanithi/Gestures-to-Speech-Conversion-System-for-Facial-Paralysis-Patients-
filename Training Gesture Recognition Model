@@ -1,0 +1,24 @@
+import serial
+import csv
+import time
+
+ser = serial.Serial('COM3', 9600)  # Change port
+time.sleep(2)
+
+gesture_id = int(input("Enter gesture ID (0-4): "))
+samples = []
+
+print("Collecting data...")
+
+while len(samples) < 100:
+    line = ser.readline().decode('utf-8').strip()
+    values = list(map(int, line.split(',')))
+    if len(values) == 5:
+        samples.append(values)
+
+ser.close()
+
+with open('gesture_data.csv', 'a', newline='') as f:
+    writer = csv.writer(f)
+    for row in samples:
+        writer.writerow(row + [gesture_id])
