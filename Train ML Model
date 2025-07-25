@@ -1,0 +1,20 @@
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+import joblib
+
+# Load data
+df = pd.read_csv('gesture_data.csv', header=None)
+X = df.iloc[:, :5]
+y = df.iloc[:, 5]
+
+# Train/Test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+
+# Train KNN
+model = KNeighborsClassifier(n_neighbors=3)
+model.fit(X_train, y_train)
+
+# Save model
+joblib.dump(model, 'gesture_model.pkl')
+print("Model trained and saved.")
